@@ -5,7 +5,7 @@ This guide will cover the fundamental concepts and principles of C# programming,
 
 You may share this guide with others, but please do not claim it as your own work.  
 If you have any questions or suggestions, feel free to reach out to me.  
-**Signed, Andrie Detera, VP-AGD '25-'26.**
+**Signed, Andrie Detera — AITS VP-AGD '25-'26.**
 
 ---
 
