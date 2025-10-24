@@ -18,15 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Challenge5", "Challenge5\Challenge5.csproj", "{369CAEFB-AFF5-423D-919D-23ACFC4D1ADA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unity Scripts", "Unity Scripts", "{98864727-4908-4B18-9A65-66F983172001}"
-	ProjectSection(SolutionItems) = preProject
-		D:\Source Codes\Game Design 2\BackToBasics\Assets\BallController.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\BallController.cs
-		D:\Source Codes\Game Design 2\BackToBasics\Assets\BallScript.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\BallScript.cs
-		D:\Source Codes\Game Design 2\BackToBasics\Assets\CameraScript.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\CameraScript.cs
-		D:\Source Codes\Game Design 2\BackToBasics\Assets\GameController.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\GameController.cs
-		D:\Source Codes\Game Design 2\BackToBasics\Assets\GameMenuScript.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\GameMenuScript.cs
-		D:\Source Codes\Game Design 2\BackToBasics\Assets\PlayerScript.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\PlayerScript.cs
-		D:\Source Codes\Game Design 2\BackToBasics\Assets\PracticeMachineProblem.unitypackage = D:\Source Codes\Game Design 2\BackToBasics\Assets\PracticeMachineProblem.unitypackage
-	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityScripts", "UnityScripts\UnityScripts.csproj", "{7642EF79-1DC7-4BB1-A052-B9F564EDF297}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,6 +51,10 @@ Global
 		{369CAEFB-AFF5-423D-919D-23ACFC4D1ADA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{369CAEFB-AFF5-423D-919D-23ACFC4D1ADA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{369CAEFB-AFF5-423D-919D-23ACFC4D1ADA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7642EF79-1DC7-4BB1-A052-B9F564EDF297}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7642EF79-1DC7-4BB1-A052-B9F564EDF297}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7642EF79-1DC7-4BB1-A052-B9F564EDF297}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7642EF79-1DC7-4BB1-A052-B9F564EDF297}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +65,7 @@ Global
 		{B2581C18-EAFC-42D3-85C9-0883E3918D92} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{1CD81867-D2B0-425B-AFAF-3562029D180A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{369CAEFB-AFF5-423D-919D-23ACFC4D1ADA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{7642EF79-1DC7-4BB1-A052-B9F564EDF297} = {98864727-4908-4B18-9A65-66F983172001}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CFBBF0F-B523-4E99-B9FA-E4E2F9EEEAE4}
