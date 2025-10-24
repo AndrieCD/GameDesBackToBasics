@@ -1,93 +1,124 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;   // For using List<T>
 
+/// <summary>
+/// Handles all game setup, GUI controls, target spawning, and simple game state management.
+/// Uses Unity’s Immediate Mode GUI (OnGUI) for interactive testing and settings.
+/// </summary>
 public class GameController : MonoBehaviour
 {
     /*
-     * PRACTICE EXERCISE: Basic in-game GUI using Unity’s Immediate Mode GUI system.
+     * 🧩 PRACTICE OVERVIEW:
+     * This script demonstrates how to create a basic in-game GUI using Unity's Immediate Mode GUI system (OnGUI).
+     * The GUI allows players to:
+     *  - Set a player name.
+     *  - Choose how many targets to spawn and their health.
+     *  - Pick a custom color using RGB sliders.
+     *  - Confirm or reset their choices.
+     *  - Display chosen settings after confirmation.
      *
-     * The goal is to create a small control panel that lets players:
-     *   - Set a player name (TextField)
-     *   - Choose a target count and target life (integer sliders)
-     *   - Adjust color with RGB sliders
-     *   - Confirm or reset their settings
-     *   - Display the chosen settings once confirmed
-     *
-     * NOTE:
-     * Unity’s GUI system (OnGUI) redraws every frame — like HTML elements being re-rendered constantly.
-     * This is great for simple prototypes or debug tools, but not recommended for final UIs.
+     * 💡 Note:
+     * The OnGUI system is redrawn every frame — it’s great for quick prototypes or debug tools
+     * but not recommended for polished UIs (use Canvas-based UI for that).
      */
 
-    // Store screen halves (for simple centering)
+    // Cached screen dimensions (used to center the GUI elements on screen)
     float ScreenWidthHalf = Screen.width / 2;
     float ScreenHeightHalf = Screen.height / 2;
 
-    // GUI Variables
-    float targetCount = 1;   // How many targets to spawn
-    float targetLife = 1;    // Health of each target
-    string playerName = "";  // Input field for player name
+    // ───────────────────────────────
+    // GUI VARIABLES
+    // ───────────────────────────────
+
+    float targetCount = 1;       // How many targets to spawn
+    float targetLife = 1;        // How many hits each target can take
+    string playerName = "";      // Player name typed in a text field
+
+    // RGB sliders for color customization (range 0–255)
     float red = 255;
     float green = 255;
     float blue = 255;
-    Color playerColor = Color.white; // Default color
+    Color playerColor = Color.white; // The resulting color applied to player
 
-    // Boolean flags (used for GUI state control)
-    bool isConfirmed = false; // True when "Confirm" is pressed
-    bool isReset = false;     // True when "Reset" is pressed
-    bool isOk = false;        // True when player confirms final screen
+    // ───────────────────────────────
+    // GUI STATE FLAGS
+    // ───────────────────────────────
+    bool isConfirmed = false;     // Becomes true when "Confirm" is clicked
+    bool isReset = false;         // True when "Reset" is clicked
+    bool isOk = false;            // True once the player confirms the final OK button
 
+    // Track target spawning and progress
+    bool targetsSpawned = false;  // To prevent spawning twice
+    bool finalPlatformReached = false; // Used to show “You Win!” message later
+    bool allTargetsDestroyed = false;  // Becomes true when all targets are gone
 
-    // SERIALIZE FIELD: For cleaner references in the Inspector
-    // SerializeField for script and GameObject references
-    [SerializeField] PlayerSc playerSc;
-    [SerializeField] GameObject targetPrefab;
+    // ───────────────────────────────
+    // REFERENCES AND DATA STORAGE
+    // ───────────────────────────────
+    List<GameObject> targets = new List<GameObject>( ); // Stores all active target instances
+    [SerializeField] PlayerSc playerSc;                // Reference to PlayerSc script
+    [SerializeField] GameObject targetPrefab;          // Prefab used to spawn targets
+    GameObject[] targetLoc;                            // Array of spawn locations (by tag)
+    private string ammoCount;                          // Text display for ammo
 
-    // Object Tagging: Use tags to find objects in the scene
-    GameObject[] targetPositions;
+    // Public property to share the OK state with other scripts (like PlayerSc)
+    public bool IsOk { get => isOk; set => isOk = value; }
 
-
+    // ───────────────────────────────
+    // UNITY LIFECYCLE METHODS
+    // ───────────────────────────────
     void Start( )
     {
-        // Usually for initialization, not needed for GUI logic
+        // Find all target spawn points in the scene by their tag "TargetLoc"
+        targetLoc = GameObject.FindGameObjectsWithTag("TargetLoc");
 
-        // Find all target positions in the scene by tag
-        targetPositions = GameObject.FindGameObjectsWithTag("TargetPosition");
+        // Initialize ammo display string
+        ammoCount = $"Ammo: {playerSc.GetAmmo( )}";
     }
 
-    // OnGUI() is called several times per frame when rendering and handling GUI events
+    // ───────────────────────────────
+    // GUI LOGIC
+    // ───────────────────────────────
     private void OnGUI( )
     {
-        // ───────────────────────────────────────────────
-        // 1. INPUT MENU (Default screen)
-        // ───────────────────────────────────────────────
-        if (!isConfirmed && !isOk)
+        // MAIN INPUT MENU (Default screen)
+        // Shown at the start before confirmation
+        if (!isConfirmed && !IsOk)  // Display this block if Confirmed and OK button has not been pressed
         {
-            // Draw a GUI box as the container/background
-            GUI.Box(new Rect(ScreenWidthHalf / 2, ScreenHeightHalf / 2 - 30, ScreenWidthHalf, ScreenHeightHalf + 60),
-                "Game Controller GUI");
+            // Create a main box to contain all GUI elements
+            GUI.Box(
+                new Rect(ScreenWidthHalf / 2, ScreenHeightHalf / 2 - 30, ScreenWidthHalf, ScreenHeightHalf + 60),
+                "Game Controller GUI"
+            );
 
             // --- Target Count ---
-            // Label (shows current slider value dynamically)
-            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 8, 200, 30), $"Target Count: {targetCount}");
-
-            // Horizontal slider (1 to 4), rounded for integer snapping
-            targetCount = GUI.HorizontalSlider(new Rect(ScreenWidthHalf / 2 + 120, ScreenHeightHalf / 2 + 10, 200, 30), targetCount, 1, 4);
-            targetCount = Mathf.Round(targetCount);
+            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 8, 200, 30),
+                $"Target Count: {targetCount}");
+            // Horizontal slider to select number of targets (1 to 4)
+            targetCount = GUI.HorizontalSlider(new Rect(ScreenWidthHalf / 2 + 120, ScreenHeightHalf / 2 + 10, 200, 30),
+                targetCount, 1, 4);
+            targetCount = Mathf.Round(targetCount); // snap to whole numbers
 
             // --- Target Life ---
-            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 40, 200, 30), $"Target Life: {targetLife}");
-            targetLife = GUI.HorizontalSlider(new Rect(ScreenWidthHalf / 2 + 120, ScreenHeightHalf / 2 + 42, 200, 30), targetLife, 1, 3);
+            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 40, 200, 30),
+                $"Target Life: {targetLife}");
+            // Horizontal slider to select target life (1 to 3)
+            targetLife = GUI.HorizontalSlider(new Rect(ScreenWidthHalf / 2 + 120, ScreenHeightHalf / 2 + 42, 200, 30),
+                targetLife, 1, 3);
             targetLife = Mathf.Round(targetLife);
 
             // --- Player Name Input ---
             GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 72, 200, 30), "Player Name:");
-            playerName = GUI.TextField(new Rect(ScreenWidthHalf / 2 + 120, ScreenHeightHalf / 2 + 72, 200, 30), playerName);
+            playerName = GUI.TextField(new Rect(ScreenWidthHalf / 2 + 120, ScreenHeightHalf / 2 + 72, 200, 30),
+                playerName);
 
-            // --- Color Sliders ---
-            // Display current RGB values from 0-255, rounded for integer snapping
-            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 104, 300, 30), $"Player Color:");
+            // --- Color Sliders (RGB) ---
+            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 104, 300, 30), "Player Color:");
             GUI.Label(new Rect(ScreenWidthHalf / 2 + 110, ScreenHeightHalf / 2 + 104, 50, 30), $"R:{red}");
             GUI.Label(new Rect(ScreenWidthHalf / 2 + 170, ScreenHeightHalf / 2 + 104, 50, 30), $"G:{green}");
             GUI.Label(new Rect(ScreenWidthHalf / 2 + 230, ScreenHeightHalf / 2 + 104, 50, 30), $"B:{blue}");
+
+            // Each vertical slider controls one color channel (top = 0, bottom = 255)
             red = GUI.VerticalSlider(new Rect(ScreenWidthHalf / 2 + 120, ScreenHeightHalf / 2 + 130, 20, 80), red, 255, 0);
             green = GUI.VerticalSlider(new Rect(ScreenWidthHalf / 2 + 180, ScreenHeightHalf / 2 + 130, 20, 80), green, 255, 0);
             blue = GUI.VerticalSlider(new Rect(ScreenWidthHalf / 2 + 240, ScreenHeightHalf / 2 + 130, 20, 80), blue, 255, 0);
@@ -95,102 +126,133 @@ public class GameController : MonoBehaviour
             green = Mathf.Round(green);
             blue = Mathf.Round(blue);
 
-
             // --- Buttons ---
-            // Returns true only on the frame the button is clicked
             isConfirmed = GUI.Button(new Rect(ScreenWidthHalf / 2 + 280, ScreenHeightHalf / 2 + 120, 100, 30), "Confirm");
             isReset = GUI.Button(new Rect(ScreenWidthHalf / 2 + 280, ScreenHeightHalf / 2 + 165, 100, 30), "Reset");
         }
 
-        // ───────────────────────────────────────────────
-        // 2. CONFIRMATION MENU
-        // ───────────────────────────────────────────────
-        // Only shown if Confirm button pressed and playerName is NOT empty
-        if (isConfirmed && !string.IsNullOrEmpty(playerName) && !isOk)
+        // CONFIRMATION MENU — displays after "Confirm" is pressed
+        if (isConfirmed && !string.IsNullOrEmpty(playerName) && !IsOk) // Make sure name is not empty
         {
-            // Box to hold confirmation details
+            // Show confirmation box and chosen settings
             GUI.Box(new Rect(ScreenWidthHalf / 2, ScreenHeightHalf / 2 - 30, ScreenWidthHalf, ScreenHeightHalf + 30), "Confirm Details");
+            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 8, 300, 30), $"Player Name: {playerName}");
+            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 40, 300, 30), $"Target Count: {targetCount}");
+            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 72, 300, 30), $"Target Life: {targetLife}");
 
-            // Display chosen settings
-            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 8, 300, 30),
-                $"Player Name: {playerName}");
-            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 40, 300, 30),
-                $"Target Count: {targetCount}");
-            GUI.Label(new Rect(ScreenWidthHalf / 2 + 20, ScreenHeightHalf / 2 + 72, 300, 30),
-                $"Target Life: {targetLife}");
+            // "OK" button finalizes setup
+            IsOk = GUI.Button(new Rect(ScreenWidthHalf / 2 + 65, ScreenHeightHalf / 2 + 140, 100, 30), "OK");
 
-            // OK Button — final confirmation
-            isOk = GUI.Button(new Rect(ScreenWidthHalf / 2 + 65, ScreenHeightHalf / 2 + 140, 100, 30), "OK");
-
-            // Back Button — return to input mode
+            // "Back" button returns to input menu
             if (GUI.Button(new Rect(ScreenWidthHalf / 2 + 220, ScreenHeightHalf / 2 + 140, 100, 30), "Back"))
                 isConfirmed = false;
         } else
         {
-            // If name was empty, go back to input menu automatically
+            // If player name was empty, return automatically to input screen
             isConfirmed = false;
         }
 
-        // ───────────────────────────────────────────────
-        // 3. RESET LOGIC
-        // ───────────────────────────────────────────────
+        // RESET LOGIC — resets GUI inputs to defaults
         if (isReset)
         {
-            // Reset values to default
             targetCount = 1;
             targetLife = 1;
             playerName = "";
-
-            // Important: turn off reset so it doesn't loop infinitely
-            isReset = false;
+            isReset = false; // important to avoid looping
         }
 
-        // ───────────────────────────────────────────────
-        // 4. OK LOGIC
-        // ───────────────────────────────────────────────
-        if (isOk)
+        // FINAL CONFIRMATION (OK STATE)
+        if (IsOk)
         {
-            // Set the player color based on RGB sliders (values 0-255 converted to 0-1)
+            // Convert 0–255 RGB values to 0–1 color range
             playerColor = new Color(red / 255f, green / 255f, blue / 255f);
-            // Here you could apply the settings to your game (e.g., spawn targets, set player name/color, etc.)
-            // @TODO:
-            // Change player color
-            // Spawn targets based on targetCount and targetLife
 
-            // Note: When manipulating other game objects, ensure those objects/scripts are properly referenced
-            // Make use of public methods or properties in those scripts to apply changes
+            // Apply chosen color to the player’s material
+            playerSc.SetPlayerColor(playerColor);
 
-            // Example: 
-            // PlayerSc.SetPlayerColor(playerColor);    // PlayerSc is a serialized field reference to the PlayerSc script
-                                                        // and SetPlayerColor is a public method you would define in that script
+            // Spawn targets once (only if not already done)
+            if (!targetsSpawned)
+                SpawnTargets((int)targetCount);
+
+            // Display player name and ammo during gameplay
+            GUI.Label(new Rect(50, 20, 200, 30), playerName);
+            ammoCount = $"Ammo: {playerSc.GetAmmo( )}";
+            GUI.Label(new Rect(50, 50, 200, 30), ammoCount);
         }
+
+        // WIN MESSAGE
+        if (finalPlatformReached)   // Show "You Win!" when player reaches final area
+            GUI.Label(new Rect(ScreenWidthHalf, ScreenHeightHalf, 600, 80), "You Win!");
     }
 
-    // Custon Function to handle spawning targets
+    // ───────────────────────────────
+    // TARGET SPAWNING
+    // ───────────────────────────────
     void SpawnTargets(int count)
     {
-        // Spawn targets based on the count parameter
-        //for (int i = 0; i < count; i++)
-        //{
-        //    // Instantiate target prefab at position determined by targetPositions array
-        //    foreach (GameObject pos in targetPositions)
-        //    {
-        //        // Instantitate a target at each position and rotation
-        //        GameObject targetObj = Instantiate(targetPrefab, pos.transform.position, pos.transform.rotation);
+        Debug.Log($"Spawning {count} targets...");
 
-        //        // Edit the target's life via its script
-        //        TargetSc targetSc = targetObj.GetComponent<TargetSc>( );
-        //        if (targetSc != null)
-        //        {
-        //            targetSc.SetLife(targetLife); // Assuming SetLife is a public method in TargetSc
-        //        }
-        //    }
-        //}
+        // Loop through spawn points and create a target at each
+        for (int i = 0; i < count; i++)
+        {
+            // Instantiate target prefab at spawn location
+            GameObject pos = targetLoc[i];
+            GameObject targetObj = Instantiate(targetPrefab, pos.transform.position, pos.transform.rotation);
+
+            // Add spawned target to list
+            targets.Add(targetObj);
+
+            // Assign life value to target through its script
+            TargetSc targetSc = targetObj.GetComponent<TargetSc>( );
+            if (targetSc != null)
+                targetSc.SetLife((int)targetLife);
+        }
+
+        // Prevent spawning again
+        targetsSpawned = true;
+        Debug.Log($"Targets spawned: {targets.Count}");
     }
 
+    // Removes a target from the list when destroyed (called by TargetSc)
+    public void RemoveFromList(GameObject removeItem)
+    {
+        targets.Remove(removeItem);
+    }
+
+    // ───────────────────────────────
+    // UPDATE LOOP
+    // ───────────────────────────────
     void Update( )
     {
-        // Empty for now — GUI logic handled in OnGUI()
-        // Could later contain gameplay control logic tied to GUI data
+        // Main gameplay checks happen here
+        if (targetsSpawned)
+        {
+            // Check if all targets are gone
+            if (targets.Count == 0)
+                allTargetsDestroyed = true;
+
+            // When all destroyed, allow player to climb higher
+            if (allTargetsDestroyed)
+                MakePlayerClimb( );
+        }
+    }
+
+    // Called when player reaches final area
+    public void FinalPlatformReached( )
+    {
+        finalPlatformReached = true;
+    }
+
+    // ───────────────────────────────
+    // UTILITY FUNCTIONS
+    // ───────────────────────────────
+    // Allows player to climb a final step/platform by increasing stepOffset
+    void MakePlayerClimb( )
+    {
+        if (playerSc != null)
+        {
+            CharacterController charController = playerSc.GetComponent<CharacterController>( );
+            charController.stepOffset = 0.5f;
+        }
     }
 }

@@ -39,10 +39,13 @@
   <ItemGroup>
     <Compile Include="BallController.cs" />
     <Compile Include="BallScript.cs" />
+    <Compile Include="BulletSc.cs" />
     <Compile Include="CameraScript.cs" />
     <Compile Include="GameController.cs" />
     <Compile Include="GameMenuScript.cs" />
+    <Compile Include="PlayerSc.cs" />
     <Compile Include="PlayerScript.cs" />
+    <Compile Include="TargetSc.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
