@@ -17,6 +17,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Challenge4", "Challenge4\Ch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Challenge5", "Challenge5\Challenge5.csproj", "{369CAEFB-AFF5-423D-919D-23ACFC4D1ADA}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Unity Scripts", "Unity Scripts", "{98864727-4908-4B18-9A65-66F983172001}"
+	ProjectSection(SolutionItems) = preProject
+		D:\Source Codes\Game Design 2\BackToBasics\Assets\BallController.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\BallController.cs
+		D:\Source Codes\Game Design 2\BackToBasics\Assets\BallScript.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\BallScript.cs
+		D:\Source Codes\Game Design 2\BackToBasics\Assets\CameraScript.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\CameraScript.cs
+		D:\Source Codes\Game Design 2\BackToBasics\Assets\GameController.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\GameController.cs
+		D:\Source Codes\Game Design 2\BackToBasics\Assets\GameMenuScript.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\GameMenuScript.cs
+		D:\Source Codes\Game Design 2\BackToBasics\Assets\PlayerScript.cs = D:\Source Codes\Game Design 2\BackToBasics\Assets\PlayerScript.cs
+		D:\Source Codes\Game Design 2\BackToBasics\Assets\PracticeMachineProblem.unitypackage = D:\Source Codes\Game Design 2\BackToBasics\Assets\PracticeMachineProblem.unitypackage
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
